@@ -11,10 +11,17 @@
 // The WndProc used when the game view is active
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
+#ifdef CLASSIC_BOOT_CONSOLE
+void HideBootConsole();
+void MoveBootConsole();
+#endif
+
 class MainWindow
 {
 public:
 	void Create(const FString& title, int x, int y, int width, int height);
+
+
 
 	void ShowGameView();
 	void RestoreConView();

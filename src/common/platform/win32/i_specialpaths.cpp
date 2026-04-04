@@ -37,8 +37,9 @@
 #include <lmcons.h>
 #include <shlobj.h>
 #include <Shlwapi.h>
-#include <VersionHelpers.h>
-
+#ifndef BUILD_TARGET_WXP32
+	#include <VersionHelpers.h>
+#endif
 #include "i_specialpaths.h"
 #include "printf.h"
 #include "cmdlib.h"
@@ -104,8 +105,15 @@ bool IsPortable()
 		}
 	}
 
+#ifdef BUILD_TARGET_WXP32
+	isportable = true;
+	return true;
+#else
+	//that makes game never portable, if portable ini doesnt exit before. WTF?!
 	isportable = false;
 	return false;
+
+#endif
 }
 
 //===========================================================================
@@ -118,17 +126,45 @@ bool IsPortable()
 
 FString GetKnownFolder(int shell_folder, REFKNOWNFOLDERID known_folder, bool create)
 {
+	FString path = "";
+	FString append = "";
+#ifdef BUILD_TARGET_WXP32
+	wchar_t wpath[MAX_PATH + 1];
+
+	if (known_folder == FOLDERID_SavedGames)
+	{
+		shell_folder = CSIDL_PROFILE;
+		append = "\\Saved Games";
+	}
+	if (known_folder == FOLDERID_Pictures)
+	{
+		shell_folder = CSIDL_MYPICTURES;
+		append = "";
+	}
+
+	if (FAILED(SHGetFolderPath(0, shell_folder, 0, SHGFP_TYPE_CURRENT, wpath)))
+	{
+		// This should never be triggered unless the OS was compromised
+		I_FatalError("Unable to retrieve known folder.");
+	}
+	path = FString(wpath) + append;
+	FixPathSeperator(path);
+#else
 	PWSTR wpath;
 	if (FAILED(SHGetKnownFolderPath(known_folder, create ? KF_FLAG_CREATE : 0, NULL, &wpath)))
 	{
 		// This should never be triggered unless the OS was compromised
 		I_FatalError("Unable to retrieve known folder.");
 	}
-	FString path = FString(wpath);
+	path = FString(wpath);
 	FixPathSeperator(path);
 	CoTaskMemFree(wpath);
+#endif		
+
 	return path;
 }
+
+
 
 //===========================================================================
 //
@@ -248,6 +284,9 @@ int M_MigrateOldConfig()
 	auto cancelstr = L"Cancel";
 	auto titlestr = L"Migrate existing configuration";
 	auto infostr = L"" GAMENAME " found a user specific config in the game folder";
+#ifdef BUILD_TARGET_WXP32
+		selection = MessageBox(NULL, infostr, titlestr, MB_YESNOCANCEL | MB_ICONWARNING );
+#else
 	const TASKDIALOG_BUTTON buttons[] = { {IDYES, globalstr}, {IDNO, portablestr}, {IDCANCEL, cancelstr} };
 	TASKDIALOGCONFIG taskDialogConfig = {};
 	taskDialogConfig.cbSize = sizeof(TASKDIALOGCONFIG);
@@ -259,6 +298,7 @@ int M_MigrateOldConfig()
 	taskDialogConfig.hwndParent = mainwindow.GetHandle();
 	taskDialogConfig.dwFlags = TDF_USE_COMMAND_LINKS;
 	TaskDialogIndirect(&taskDialogConfig, &selection, NULL, NULL);
+#endif
 	if (selection == IDYES || selection == IDNO) return selection;
 	throw CExitEvent(3);
 }
@@ -334,6 +374,10 @@ FString M_GetConfigPath(bool for_reading)
 
 FString M_GetScreenshotsPath()
 {
+	//todo
+	static const GUID FOLDERID_Screenshots =
+	{0xB7BEDE81, 0xDF94, 0x4682, { 0xA7, 0xD8, 0x57, 0xA5, 0x26, 0x20, 0xB8, 0x6F }};
+
 	FString path;
 
 	if (IsPortable())

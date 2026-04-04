@@ -35,6 +35,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef CLASSIC_BOOT_CONSOLE
+#include "i_mainwindow.h"
+#endif
+
 #include <math.h>
 #include <assert.h>
 
@@ -3109,7 +3113,9 @@ static int D_InitGame(const FIWADInfo* iwad_info, std::vector<std::string>& allw
 		// This allocates a dummy framebuffer as a stand-in until V_Init2 is called.
 		V_InitScreen();
 	}
+#ifndef BUILD_TARGET_WXP32
 	SavegameFolder = iwad_info->Autoname;
+#endif
 	gameinfo.gametype = iwad_info->gametype;
 	gameinfo.flags = iwad_info->flags;
 	gameinfo.nokeyboardcheats = iwad_info->nokeyboardcheats;
@@ -3243,6 +3249,15 @@ static int D_InitGame(const FIWADInfo* iwad_info, std::vector<std::string>& allw
 		delete exec;
 		exec = NULL;
 	}
+
+#ifdef CLASSIC_BOOT_CONSOLE
+	MoveBootConsole();
+	if (StartScreen)
+	{
+		Printf("going graphic, hiding boot console window.\n");
+		HideBootConsole();
+	}
+#endif
 
 	if (!restart)
 		V_Init2();
@@ -3765,6 +3780,11 @@ static int D_DoomMain_Internal (void)
 		delete iwad_man;	// now we won't need this anymore
 		iwad_man = NULL;
 		if (ret != 0) return ret;
+
+#ifdef CLASSIC_BOOT_CONSOLE
+		Printf("init done, hiding boot console window.\n");
+		HideBootConsole();
+#endif
 
 		D_DoAnonStats();
 		I_UpdateWindowTitle();

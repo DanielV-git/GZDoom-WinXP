@@ -42,6 +42,9 @@
 #include "fs_findfile.h"
 #include "fs_swap.h"
 #include "fs_stringpool.h"
+#ifdef BUILD_TARGET_WXP32
+#include <algorithm>
+#endif
 
 namespace FileSys {
 	using namespace byteswap;

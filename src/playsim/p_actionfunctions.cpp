@@ -86,6 +86,9 @@ static FRandom pr_monsterrefire ("MonsterRefire");
 static FRandom pr_teleport("A_Teleport");
 static FRandom pr_bfgselfdamage("BFGSelfDamage");
 	   FRandom pr_cajump("CustomJump");
+#ifdef BUILD_TARGET_WXP32
+	   FRandom pr_shadowaimz("VerticalShadowAim");
+#endif
 
 //==========================================================================
 //

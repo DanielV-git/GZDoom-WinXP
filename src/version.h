@@ -34,10 +34,20 @@
 #ifndef __VERSION_H__
 #define __VERSION_H__
 
+#undef _WIN32_WINNT
+#define _WIN32_WINNT _WIN32_WINNT_WINXP
+
+
+//XP32
+
 const char *GetGitDescription();
 const char *GetGitHash();
 const char *GetGitTime();
 const char *GetVersionString();
+
+//bool IsWindowsVistaOrGrater();
+bool IsWindows8OrGreater();
+bool IsWindows10OrGreater();
 
 /** Lots of different version numbers **/
 

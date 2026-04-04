@@ -160,6 +160,8 @@ FRandom::FRandom ()
 
 FRandom::FRandom (const char *name)
 {
+
+
 	NameCRC = CalcCRC32 ((const uint8_t *)name, (unsigned int)strlen (name));
 #ifndef NDEBUG
 	Name = name;
@@ -174,8 +176,20 @@ FRandom::FRandom (const char *name)
 
 	while (probe != NULL && probe->NameCRC < NameCRC)
 	{
+
 		prev = &probe->Next;
 		probe = probe->Next;
+
+#ifdef BUILD_TARGET_WXP32
+		//todo
+		//hangs because same function is thrown in multiple times and algo doesnt like that with v141_XP !?!
+		if (probe != NULL && probe->NameCRC == NameCRC)
+		{
+			//?!? suitable fix? works with multiple functions in Array
+			Init(0);
+			return;
+		}
+#endif
 	}
 
 #ifndef NDEBUG

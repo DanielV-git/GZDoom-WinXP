@@ -34,7 +34,9 @@
 
 #include <string>
 
-
+#ifdef CLASSIC_BOOT_CONSOLE
+#include "i_mainwindow.h"
+#endif
 #include "version.h"
 #include "c_bind.h"
 #include "c_console.h"
@@ -65,6 +67,27 @@
 #include "g_input.h"
 #include "c_commandbuffer.h"
 #include "vm.h"
+
+
+#ifdef CLASSIC_BOOT_CONSOLE
+
+void PrintStringBootConsole(const char *outline)
+{
+	HWND hEdit = GetDlgItem(mainwindow.GetHandle(), 101);
+	HDC hdc = GetDC(hEdit);
+
+	if (hdc)
+	{
+		SendMessageA(hEdit, EM_SETSEL, (WPARAM)-1, (LPARAM)-1);
+		SendMessageA(hEdit, EM_REPLACESEL, FALSE, (LPARAM)outline);
+		SendMessageA(hEdit, WM_VSCROLL, SB_BOTTOM, 0);
+		ReleaseDC(hEdit, hdc);
+		I_GetEvent();
+	}
+}
+
+#endif
+
 
 #define LEFTMARGIN 8
 #define RIGHTMARGIN 8
@@ -432,6 +455,9 @@ int PrintString (int iprintlevel, const char *outline)
 			I_PrintStr(outline);
 
 			conbuffer->AddText(printlevel, outline);
+#ifdef CLASSIC_BOOT_CONSOLE
+			if (gamestate == GS_STARTUP) { PrintStringBootConsole(outline); }
+#endif
 			if (vidactive && screen && !(iprintlevel & PRINT_NONOTIFY) && NotifyStrings)
 			{
 				if (printlevel >= msglevel)

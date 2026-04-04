@@ -69,18 +69,19 @@ protected:
 	FGameTexture* HeaderTexture = nullptr;
 	FGameTexture* NetTexture = nullptr;
 public:
-	FStartScreen(int maxp) { MaxPos = maxp; }
+	FStartScreen(int maxp) { MaxPos = maxp; 	HMsgY = 7;	SMsgX = 1;	}
 	virtual ~FStartScreen() = default;
 	void Render(bool force = false);
 	bool Progress(int);
 	void NetProgress(int count);
-	virtual void LoadingStatus(const char *message, int colors) {}
+	virtual void LoadingStatus(const char *message, int colors) {};
 	virtual void AppendStatusLine(const char *status) {}
 	virtual bool NetInit(const char* message, int numplayers);
 	virtual void NetDone() {}
 	virtual void NetTick() {}
 	FBitmap& GetBitmap() { return StartupBitmap; }
 	int GetScale() const { return Scale; }
+	int HMsgY, SMsgX;
 
 	
 protected:

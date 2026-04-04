@@ -54,6 +54,12 @@
 #define NO_SANITIZE_M
 #endif
 
+//todo
+#ifdef BUILD_TARGET_WXP32
+	#undef NO_SANITIZE_M
+	#define NO_SANITIZE_M
+#endif
+
 class FAutoSeg
 {
 	const char *name;

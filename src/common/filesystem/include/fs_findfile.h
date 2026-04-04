@@ -5,6 +5,10 @@
 #include <vector>
 #include <string>
 
+#ifdef BUILD_TARGET_WXP32
+int my_wstat64(const wchar_t *path, struct _stat64 *buffer);
+#endif 
+
 namespace FileSys {
 	
 struct FileListEntry
