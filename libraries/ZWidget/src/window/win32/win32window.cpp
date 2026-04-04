@@ -1,14 +1,29 @@
-
 #include "win32window.h"
 #include <windowsx.h>
 #include <stdexcept>
 #include <cmath>
 #include <vector>
+#ifndef BUILD_TARGET_WXP32
 #include <dwmapi.h>
 
 #pragma comment(lib, "dwmapi.lib")
+#else
+UINT GetDpiForWindow_XP(HWND hWnd)
+{
+    HDC hdc = GetDC(hWnd); 
+    if (hdc)
+	{
+        int dpi = GetDeviceCaps(hdc, LOGPIXELSY); 
+        ReleaseDC(hWnd, hdc);
+        return (UINT)dpi;
+    }
+    return 96;
+}
+#endif
 
-#ifndef HID_USAGE_PAGE_GENERIC
+
+
+#ifndef HID_USAGE_PAGE8_GENERIC
 #define HID_USAGE_PAGE_GENERIC		((USHORT) 0x01)
 #endif
 
@@ -104,20 +119,26 @@ void Win32Window::SetWindowTitle(const std::string& text)
 
 void Win32Window::SetBorderColor(uint32_t bgra8)
 {
+#ifndef BUILD_TARGET_WXP32
 	bgra8 = bgra8 & 0x00ffffff;
 	DwmSetWindowAttribute(WindowHandle, 34/*DWMWA_BORDER_COLOR*/, &bgra8, sizeof(uint32_t));
+#endif
 }
 
 void Win32Window::SetCaptionColor(uint32_t bgra8)
 {
+#ifndef BUILD_TARGET_WXP32
 	bgra8 = bgra8 & 0x00ffffff;
 	DwmSetWindowAttribute(WindowHandle, 35/*DWMWA_CAPTION_COLOR*/, &bgra8, sizeof(uint32_t));
+#endif
 }
 
 void Win32Window::SetCaptionTextColor(uint32_t bgra8)
 {
+#ifndef BUILD_TARGET_WXP32
 	bgra8 = bgra8 & 0x00ffffff;
 	DwmSetWindowAttribute(WindowHandle, 36/*DWMWA_TEXT_COLOR*/, &bgra8, sizeof(uint32_t));
+#endif
 }
 
 void Win32Window::SetWindowFrame(const Rect& box)
@@ -138,7 +159,12 @@ void Win32Window::SetClientFrame(const Rect& box)
 
 	DWORD style = (DWORD)GetWindowLongPtr(WindowHandle, GWL_STYLE);
 	DWORD exstyle = (DWORD)GetWindowLongPtr(WindowHandle, GWL_EXSTYLE);
+
+#ifdef BUILD_TARGET_WXP32
+	AdjustWindowRectEx(&rect, style, FALSE, exstyle);
+#else
 	AdjustWindowRectExForDpi(&rect, style, FALSE, exstyle, GetDpiForWindow(WindowHandle));
+#endif
 
 	SetWindowPos(WindowHandle, nullptr, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, SWP_NOACTIVATE | SWP_NOZORDER);
 }
@@ -270,7 +296,11 @@ int Win32Window::GetPixelHeight() const
 
 double Win32Window::GetDpiScale() const
 {
+#ifdef BUILD_TARGET_WXP32
+	return GetDpiForWindow_XP(WindowHandle) / 96.0;
+#else
 	return GetDpiForWindow(WindowHandle) / 96.0;
+#endif
 }
 
 std::string Win32Window::GetClipboardText()
@@ -371,8 +401,11 @@ void Win32Window::PresentBitmap(int width, int height, const uint32_t* pixels)
 LRESULT Win32Window::OnWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	LPARAM result = 0;
+#ifndef BUILD_TARGET_WXP32
+	// no action on XP, no DWM is doing work
 	if (DwmDefWindowProc(WindowHandle, msg, wparam, lparam, &result))
 		return result;
+#endif	
 
 	if (msg == WM_INPUT)
 	{

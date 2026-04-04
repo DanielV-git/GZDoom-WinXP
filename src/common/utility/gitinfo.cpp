@@ -63,7 +63,7 @@ const char *GetGitTime()
 const char *GetVersionString()
 {
 #ifdef BUILD_TARGET_WXP32
-	return ("g4.12.0-WXP32 1.0.0 by DV");
+	return ("g4.12.0-WXP32 1.0.1 by DV");
 #else
 	if (GetGitDescription()[0] == '\0')
 	{

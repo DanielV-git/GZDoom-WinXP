@@ -1,4 +1,7 @@
 #pragma once
+#ifdef BUILD_TARGET_WXP32
+#include <algorithm>
+#endif
 
 class Point
 {
