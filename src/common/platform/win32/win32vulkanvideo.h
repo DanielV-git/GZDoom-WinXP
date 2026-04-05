@@ -37,7 +37,11 @@ public:
 			builder.RequireExtension(names[i]);
 		auto instance = builder.Create();
 
+#ifdef BUILD_TARGET_WXP32
+		VkSurfaceKHR surfacehandle = 0;
+#else
 		VkSurfaceKHR surfacehandle = nullptr;
+#endif
 		if (!I_CreateVulkanSurface(instance->Instance, &surfacehandle))
 			VulkanError("I_CreateVulkanSurface failed");
 

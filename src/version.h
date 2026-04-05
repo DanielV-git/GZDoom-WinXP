@@ -39,6 +39,9 @@ const char *GetGitHash();
 const char *GetGitTime();
 const char *GetVersionString();
 
+//bool IsWindowsVistaOrGrater();
+bool IsWindows8OrGreater();
+bool IsWindows10OrGreater();
 /** Lots of different version numbers **/
 
 #define VERSIONSTR "4.14.2"

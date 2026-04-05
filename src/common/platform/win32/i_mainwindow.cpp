@@ -16,11 +16,34 @@
 #include <richedit.h>
 #include <shellapi.h>
 #include <commctrl.h>
+
+
+
+#ifndef BUILD_TARGET_WXP32
 #include <dwmapi.h>
 
 #pragma comment(lib, "dwmapi.lib")
+#endif
 
 MainWindow mainwindow;
+
+#ifdef CLASSIC_BOOT_CONSOLE
+int nPosOrgX;
+int nPosOrgY;
+int nWidthOrg;
+int nHeigthOrg;
+void HideBootConsole()
+{
+	HWND hBootConsole = GetDlgItem(mainwindow.GetHandle(), 101);
+	ShowWindow(hBootConsole, SW_HIDE);
+}
+void MoveBootConsole()
+{
+	HWND hBootConsole = GetDlgItem(mainwindow.GetHandle(), 101);
+	SendMessage(hBootConsole, EM_SETBKGNDCOLOR, 0, RGB(0, 0, 0)); //to match back of graphic mode
+	MoveWindow(hBootConsole, nPosOrgX, nPosOrgY, nWidthOrg, nHeigthOrg, TRUE);
+}
+#endif
 
 void MainWindow::Create(const FString& caption, int x, int y, int width, int height)
 {
@@ -69,10 +92,49 @@ void MainWindow::Create(const FString& caption, int x, int y, int width, int hei
 	uint32_t captioncolor = RGB(33, 33, 33);
 	uint32_t textcolor = RGB(226, 223, 219);
 
-	// Don't error check these as they only exist on Windows 11, and if they fail then that is OK.
-	DwmSetWindowAttribute(Window, 34/*DWMWA_BORDER_COLOR*/, &bordercolor, sizeof(uint32_t));
-	DwmSetWindowAttribute(Window, 35/*DWMWA_CAPTION_COLOR*/, &captioncolor, sizeof(uint32_t));
-	DwmSetWindowAttribute(Window, 36/*DWMWA_TEXT_COLOR*/, &textcolor, sizeof(uint32_t));
+#ifndef BUILD_TARGET_WXP32
+// Don't error check these as they only exist on Windows 11, and if they fail then that is OK.
+DwmSetWindowAttribute(Window, 34/*DWMWA_BORDER_COLOR*/, &bordercolor, sizeof(uint32_t));
+DwmSetWindowAttribute(Window, 35/*DWMWA_CAPTION_COLOR*/, &captioncolor, sizeof(uint32_t));
+DwmSetWindowAttribute(Window, 36/*DWMWA_TEXT_COLOR*/, &textcolor, sizeof(uint32_t));
+#endif
+
+#ifdef CLASSIC_BOOT_CONSOLE
+	nPosOrgX = x;
+	nPosOrgY = y;
+	nWidthOrg = width;
+	nHeigthOrg = height;
+
+	CHARFORMAT2W format;
+
+	// Create log read-only edit control
+	HWND hBootConsole = CreateWindowExW(WS_EX_NOPARENTNOTIFY, L"RichEdit20W", nullptr,
+		WS_CHILD | WS_VISIBLE  |
+		ES_LEFT | ES_MULTILINE | WS_CLIPSIBLINGS | ES_AUTOVSCROLL,
+		1, 1, width-1, height-1,
+		Window, (HMENU)101, GetModuleHandle(NULL), NULL);
+	HRESULT hr;
+	hr = GetLastError();
+	if (hBootConsole == NULL)
+	{
+		return;
+	}
+	SendMessage(hBootConsole, EM_SETREADONLY, TRUE, 0);
+	SendMessage(hBootConsole, EM_EXLIMITTEXT, 0, 0x7FFFFFFE);
+	SendMessage(hBootConsole, EM_SETBKGNDCOLOR, 0, RGB(20, 20, 20));
+	// Setup default font for the log.
+	//SendMessage (view, WM_SETFONT, (WPARAM)GetStockObject (DEFAULT_GUI_FONT), FALSE);
+	format.cbSize = sizeof(format);
+	format.dwMask = CFM_BOLD | CFM_COLOR | CFM_FACE | CFM_SIZE | CFM_CHARSET;
+	format.dwEffects = 0;
+	format.yHeight = 200;
+	format.crTextColor = RGB(223, 223, 223);
+	format.bCharSet = ANSI_CHARSET;
+	format.bPitchAndFamily = FF_SWISS | VARIABLE_PITCH;
+	wcscpy(format.szFaceName, L"DejaVu Sans");	// At least I have it. :p
+	SendMessage(hBootConsole, EM_SETCHARFORMAT, SCF_ALL, (LPARAM)&format);
+
+#endif
 }
 
 // Sets the main WndProc, hides all the child windows, and starts up in-game input.
@@ -169,7 +231,12 @@ void MainWindow::GetLog(std::function<bool(const void* data, uint32_t size, uint
 		size_t len = line.Len();
 		while (pos < len)
 		{
+#ifndef BUILD_TARGET_WXP32
 			uint32_t size = (uint32_t)std::min(len - pos, 0x0fffffffULL);
+#else			
+			//len/pos are size_t, not mixing with unsigned long long
+			uint32_t size = (uint32_t)std::min((unsigned long long)(len - pos), 0x0fffffffULL);
+#endif
 			uint32_t written = 0;
 			if (!writeData(&line[pos], size, written))
 				return;

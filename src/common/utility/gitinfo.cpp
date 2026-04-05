@@ -36,6 +36,9 @@
 
 #include "gitinfo.h"
 #include "version.h"
+#include <windows.h>
+
+
 
 const char *GetGitDescription()
 {
@@ -47,13 +50,21 @@ const char *GetGitHash()
 	return GIT_HASH;
 }
 
+
 const char *GetGitTime()
 {
+#ifdef BUILD_TARGET_WXP32
+	return (__DATE__ " " __TIME__);
+#else
 	return GIT_TIME;
+#endif
 }
 
 const char *GetVersionString()
 {
+#ifdef BUILD_TARGET_WXP32
+	return ("g4.14.2-WXP32 1.0.0 by DV");
+#else
 	if (GetGitDescription()[0] == '\0')
 	{
 		return VERSIONSTR;
@@ -62,4 +73,35 @@ const char *GetVersionString()
 	{
 		return GIT_DESCRIPTION;
 	}
+#endif
 }
+
+/*
+bool IsWindowsVistaOrGrater()
+{
+	OSVERSIONINFO osvi;
+	ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
+	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+	GetVersionEx(&osvi);
+	return osvi.dwMajorVersion >= 6;
+}
+*/
+
+bool IsWindows8OrGreater()
+{
+	OSVERSIONINFO osvi;
+	ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
+	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+	GetVersionEx(&osvi);
+	return ( (osvi.dwMajorVersion >= 6) && (osvi.dwMinorVersion >= 2) ); //8.1: Minor=3
+}
+
+bool IsWindows10OrGreater()
+{
+	OSVERSIONINFO osvi;
+	ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
+	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+	GetVersionEx(&osvi);
+	return osvi.dwMajorVersion >= 10;
+}
+

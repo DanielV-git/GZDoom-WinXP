@@ -42,6 +42,22 @@ namespace FileSys {
 
 class FInternalCriticalSection
 {
+#ifdef BUILD_TARGET_WXP32
+public:
+	void Enter()
+	{
+		//AcquireSRWLockExclusive(&CritSec);
+		EnterCriticalSection(&CritSec);
+	}
+	void Leave()
+	{
+		//ReleaseSRWLockExclusive(&CritSec);
+		LeaveCriticalSection(&CritSec);
+	}
+private:
+	CRITICAL_SECTION CritSec;// = SRWLOCK_INIT;
+};
+#else
 public:
 	void Enter()
 	{
@@ -54,6 +70,7 @@ public:
 private:
 	SRWLOCK CritSec = SRWLOCK_INIT;
 };
+#endif
 
 
 FInternalCriticalSection *CreateCriticalSection()

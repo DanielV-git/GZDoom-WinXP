@@ -17,7 +17,12 @@ extern FRandom pr_spawnmissile;
 extern FRandom pr_facetarget;
 extern FRandom pr_railface;
 extern FRandom pr_crailgun;
-inline FRandom pr_shadowaimz("VerticalShadowAim");
+#ifdef BUILD_TARGET_WXP32
+	extern FRandom pr_shadowaimz;
+#else
+	//FRandom hangs because function is thrown in multiple times and algo doesnt like that with v141_XP !?!
+	inline FRandom pr_shadowaimz("VerticalShadowAim");
+#endif
 
 //==========================================================================
 //

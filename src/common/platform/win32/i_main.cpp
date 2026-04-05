@@ -41,9 +41,15 @@
 #include <commctrl.h>
 #include <richedit.h>
 
+#ifndef BUILD_TARGET_WXP32
 #include <processenv.h>
+#endif
 #include <shellapi.h>
+#ifndef BUILD_TARGET_WXP32
 #include <VersionHelpers.h>
+#else
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#endif
 
 #ifdef _MSC_VER
 #pragma warning(disable:4244)
