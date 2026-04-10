@@ -18,8 +18,9 @@ LineEdit::LineEdit(Widget* parent) : Widget(parent)
 
 LineEdit::~LineEdit()
 {
-	delete timer;
-	delete scroll_timer;
+	//unique_pointer of LauncherWindow takes care of destruction for all its objects - already fixed in codebase after 4.14.2 
+	//delete timer;
+	//delete scroll_timer;
 }
 
 bool LineEdit::IsReadOnly() const

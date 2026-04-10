@@ -75,7 +75,11 @@ void MainWindow::Create(const FString& caption, int x, int y, int width, int hei
 		WS_EX_APPWINDOW,
 		WinClassName,
 		wcaption.c_str(),
+#ifdef CLASSIC_BOOT_CONSOLE
+		WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPCHILDREN,
+#else
 		WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
+#endif
 		x, y, width, height,
 		(HWND)NULL,
 		(HMENU)NULL,
@@ -135,6 +139,7 @@ DwmSetWindowAttribute(Window, 36/*DWMWA_TEXT_COLOR*/, &textcolor, sizeof(uint32_
 	SendMessage(hBootConsole, EM_SETCHARFORMAT, SCF_ALL, (LPARAM)&format);
 
 #endif
+
 }
 
 // Sets the main WndProc, hides all the child windows, and starts up in-game input.
@@ -231,7 +236,7 @@ void MainWindow::GetLog(std::function<bool(const void* data, uint32_t size, uint
 		size_t len = line.Len();
 		while (pos < len)
 		{
-#ifndef BUILD_TARGET_WXP32
+#ifndef WIN32
 			uint32_t size = (uint32_t)std::min(len - pos, 0x0fffffffULL);
 #else			
 			//len/pos are size_t, not mixing with unsigned long long

@@ -42,7 +42,7 @@
 #include "fs_findfile.h"
 #include "fs_swap.h"
 #include "fs_stringpool.h"
-#ifdef BUILD_TARGET_WXP32
+#ifdef _MSC_VER
 #include <algorithm>
 #endif
 

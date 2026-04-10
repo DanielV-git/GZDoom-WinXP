@@ -197,6 +197,8 @@ endmacro()
 
 include( CheckFunctionExists )
 
+add_definitions( -DBUILD_TARGET_WXP32 )
+
 macro( require_stricmp )
 	CHECK_FUNCTION_EXISTS( stricmp STRICMP_EXISTS )
 	if( NOT STRICMP_EXISTS )
@@ -242,7 +244,7 @@ if( MSVC )
 	# String pooling
 	# Function-level linking
 	# Disable run-time type information
-	set( ALL_C_FLAGS "/GF /Gy /permissive- /utf-8" )
+	set( ALL_C_FLAGS "/GF /Gy /permissive /std:c++17 /utf-8" )
 
 	if ( HAVE_VULKAN )
 		set( ALL_C_FLAGS "${ALL_C_FLAGS} /DHAVE_VULKAN" )

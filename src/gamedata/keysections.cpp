@@ -89,6 +89,7 @@ void M_SaveCustomKeys (FConfigFile *config, char *section, char *subsection, siz
 
 static int CurrentKeySection = -1;
 
+
 CCMD (addkeysection)
 {
 	if (ParsingKeyConf)
@@ -100,7 +101,13 @@ CCMD (addkeysection)
 		}
 
 		// Limit the ini name to 32 chars
+#ifndef BUILD_TARGET_WXP32
+		// WXP32: will crash on XP when argv[2] is shorter than 32 Bytes and resides right before memory section end
 		FString name(argv[2], 32);
+#else
+		// WXP32: changed in newer code revisions to that:
+		FString name(argv[2]);
+#endif
 
 		for (unsigned i = 0; i < KeySections.Size(); i++)
 		{
@@ -119,6 +126,7 @@ CCMD (addkeysection)
 		LoadKeys (argv[2], 1);
 	}
 }
+
 
 CCMD (addmenukey)
 {

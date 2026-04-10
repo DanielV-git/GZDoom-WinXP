@@ -1,4 +1,7 @@
 #pragma once
+#ifdef _MSC_VER
+#include <algorithm>
+#endif
 
 class Point
 {
