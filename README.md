@@ -20,10 +20,10 @@ To build GZDoom, please see the [wiki](https://zdoom.org/wiki/) and see the "Pro
 Additional Info for WinXP Build:
 - Visual Studio Community 2017 v15.9
 - v14.16 v141_xp toolset
-- WinSDK 7.1
+- WinSDK 7.1A
 - CMAKE 4.3.0
 - Settings:
-- - C++ Language: /permissive-
+- - C++ Language: /permissive
   - C++ Language: ISO C++ 17
   - C++ preprocessor defines: BUILD_TARGET_WXP32, CLASSIC_BOOT_CONSOLE
 
